@@ -1,0 +1,12 @@
+{
+	"fmt": {
+		"semiColons": false,
+		"lineWidth": 100,
+		"useTabs": true,
+		"proseWrap": "never"
+	},
+	"importMap": "./import_map.json",
+	"compilerOptions": {
+		"exactOptionalPropertyTypes": true
+	}
+}

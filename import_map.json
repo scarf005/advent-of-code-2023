@@ -1,0 +1,13 @@
+{
+	"imports": {
+		"$std/": "https://deno.land/std@0.208.0/",
+		"$outdent/": "https://deno.land/x/outdent@v0.8.0/",
+		"$cliffy/": "https://deno.land/x/cliffy@v1.0.0-rc.3/",
+		"$zod/": "https://deno.land/x/zod@v3.22.4/",
+		"$asynciter/": "https://deno.land/x/asynciter@0.0.18/",
+		"$typed_regex/": "https://deno.land/x/typed_regex@0.1.0/",
+		"$fast-check": "https://esm.sh/v135/fast-check@3.14.0/es2022/fast-check.mjs",
+
+		"$utils/": "./ts/utils/"
+	}
+}

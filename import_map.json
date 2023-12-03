@@ -7,6 +7,7 @@
 		"$asynciter/": "https://deno.land/x/asynciter@0.0.18/",
 		"$typed_regex/": "https://deno.land/x/typed_regex@0.1.0/",
 		"$fast-check": "https://esm.sh/v135/fast-check@3.14.0/es2022/fast-check.mjs",
+		"$set_operations/": "https://deno.land/x/set_operations@v1.1.1/",
 
 		"$utils/": "./ts/utils/"
 	}

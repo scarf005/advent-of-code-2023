@@ -1,15 +1,20 @@
 import * as dotenv from "$std/dotenv/mod.ts"
-import { basename } from "$std/path/mod.ts"
-import { Command } from "$cliffy/command/mod.ts"
-import { z } from "$zod/mod.ts"
+import { basename } from "$std/path/basename.ts"
+import { Command } from "$cliffy/command/command.ts"
 import { asynciter } from "$asynciter/mod.ts"
-import * as set from "https://deno.land/x/set_operations@v1.1.1/mod.ts"
+import { difference } from "$set_operations/mod.ts"
 
 const cookieKey = "AOC_SESSION"
-const cookieSchema = z.string().min(1, "Session cannot be empty!")
 const getCookie = async () => {
 	const env = Deno.env.get(cookieKey) ?? (await dotenv.load())[cookieKey]
-	return cookieSchema.parse(env)
+
+	if (typeof env !== "string") {
+		throw new Error(`Environment variable ${cookieKey} is not a string!`)
+	} else if (env.length === 0) {
+		throw new Error(`Environment variable ${cookieKey} is empty!`)
+	}
+
+	return env
 }
 
 type AuthedFetch = (input: RequestInfo | URL) => Promise<Response>
@@ -76,7 +81,7 @@ const main = () =>
 		.option("-E, --cookie <cookie:string>", "session cookie, defaults to AOC_SESSION env variable")
 		.option("--cache <path:string>", "path to cache inputs", { default: "./.cache" })
 		.action(async ({ year, cache, cookie = getCookie() }) => {
-			const uncachedInputs = set.difference(countInputs(year), await readCachedInputs(cache))
+			const uncachedInputs = difference(countInputs(year), await readCachedInputs(cache))
 			const size = uncachedInputs.size
 
 			if (size === 0) {

@@ -1,4 +1,7 @@
 {
+    "tasks": {
+        "fetch": "deno run -A fetch.ts"
+    },
 	"fmt": {
 		"semiColons": false,
 		"lineWidth": 100,

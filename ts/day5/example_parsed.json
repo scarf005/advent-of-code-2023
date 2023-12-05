@@ -1,0 +1,65 @@
+{
+	"seeds": [79, 14, 55, 13],
+	"maps": [
+		{
+			"from": "seed",
+			"to": "soil",
+			"ranges": [
+				{ "l": 50, "r": 97, "diff": 2 },
+				{ "l": 98, "r": 99, "diff": -48 }
+			]
+		},
+		{
+			"from": "soil",
+			"to": "fertilizer",
+			"ranges": [
+				{ "l": 0, "r": 14, "diff": 39 },
+				{ "l": 15, "r": 51, "diff": -15 },
+				{ "l": 52, "r": 53, "diff": -15 }
+			]
+		},
+		{
+			"from": "fertilizer",
+			"to": "water",
+			"ranges": [
+				{ "l": 0, "r": 6, "diff": 42 },
+				{ "l": 7, "r": 10, "diff": 50 },
+				{ "l": 11, "r": 52, "diff": -11 },
+				{ "l": 53, "r": 60, "diff": -4 }
+			]
+		},
+		{
+			"from": "water",
+			"to": "light",
+			"ranges": [
+				{ "l": 18, "r": 24, "diff": 70 },
+				{ "l": 25, "r": 94, "diff": -7 }
+			]
+		},
+		{
+			"from": "light",
+			"to": "temperature",
+			"ranges": [
+				{ "l": 45, "r": 63, "diff": 36 },
+				{ "l": 64, "r": 76, "diff": 4 },
+				{ "l": 77, "r": 99, "diff": -32 }
+			]
+		},
+		{
+			"from": "temperature",
+			"to": "humidity",
+			"ranges": [
+				{ "l": 0, "r": 68, "diff": 1 },
+				{ "l": 69, "r": 69, "diff": -69 }
+			]
+		},
+		{
+			"from": "humidity",
+			"to": "location",
+			"ranges": [
+				{ "l": 56, "r": 92, "diff": 4 },
+				{ "l": 93, "r": 96, "diff": -37 }
+			]
+		}
+	]
+}

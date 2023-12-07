@@ -1,8 +1,9 @@
 import { sum } from "$utils/mod.ts"
 import { input } from "$utils/mod.ts"
 import outdent from "$outdent/mod.ts"
-import { cmp, parse } from "./parse.ts"
-import { parseHand } from "./part1.ts"
+import { cmp, parse, type ParseHand } from "./parse.ts"
+import * as p1 from "./part1.ts"
+import * as p2 from "./part2.ts"
 
 const example = outdent`
     32T3K 765
@@ -12,7 +13,7 @@ const example = outdent`
     QQQJA 483
 `
 
-export const part1 = (x: string): number =>
+const solve = (parseHand: ParseHand) => (x: string): number =>
 	x
 		.split("\n")
 		.map(parse(parseHand))
@@ -20,6 +21,14 @@ export const part1 = (x: string): number =>
 		.map(({ bid }, i) => bid * (i + 1))
 		.reduce(sum)
 
-const text = await input(import.meta)
-console.log(part1(example))
-console.log(part1(text))
+export const part1 = solve(p1.parseHand)
+export const part2 = solve(p2.parseHand)
+
+if (import.meta.main) {
+	console.log(part1(example))
+	console.log(part2(example))
+
+	const text = await input(import.meta)
+	console.log(part1(text))
+	console.log(part2(text))
+}

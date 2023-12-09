@@ -1,6 +1,6 @@
 import { assertEquals } from "$std/assert/assert_equals.ts"
 import outdent from "$outdent/mod.ts"
-import { parse, part1 } from "../day1/part1.ts"
+import { parse, part1 } from "./part1.ts"
 import { parallelOption } from "$utils/mod.ts"
 
 const cases = [

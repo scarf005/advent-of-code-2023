@@ -6,7 +6,7 @@ export const mul: BinMath = (a, b) => a * b
 export const gcd: BinMath = (x, y) => (y === 0 ? x : gcd(y, x % y))
 export const lcm: BinMath = (x, y) => (x * y) / gcd(x, y)
 
-export const day = (url: string) => parseInt(url.match(/day(\d+)/)![1], 10)
+export const day = (url: string) => url.match(/day(\d+)/)![1]
 
 export const questionPath = (url: string) => new URL(`../../.cache/${day(url)}.txt`, url)
 

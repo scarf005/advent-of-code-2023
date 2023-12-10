@@ -94,7 +94,7 @@ const main = () =>
 			await asynciter([...uncachedInputs])
 				.concurrentUnorderedMap(async (day) => ({ day, input: await query(day) }))
 				.concurrentUnorderedMap(({ day, input }) =>
-					Deno.writeTextFile(`${cache}/${day}.txt`, input)
+					Deno.writeTextFile(`${cache}/${`${day}`.padStart(2, "0")}.txt`, input)
 				)
 				.collect()
 		})

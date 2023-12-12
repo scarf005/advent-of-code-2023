@@ -13,6 +13,8 @@ export const questionPath = (url: string) => new URL(`../../.cache/${day(url)}.t
 export const input = (meta: ImportMeta) =>
 	Deno.readTextFile(questionPath(meta.url)).then((text) => text.trim())
 
+export type Pos = { y: number; x: number }
+
 /** Test that can be ran in parallel */
 export const parallelOption = {
 	sanitizeExit: false,

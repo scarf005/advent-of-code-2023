@@ -74,24 +74,7 @@ const findStart = (xss: Grid<string>): Pos => {
 	return { y, x }
 }
 
-const example = outdent`
-..F7.
-.FJ|.
-SJ.L7
-|F--J
-LJ...
-`
 const display = (xss: Grid<string>) => xss.map((xs) => xs.join("")).join("\n")
-
-// color is determined by distance from center
-// @param d dimension
-// @param s center of grid
-const mkColor = (d: Pos, s: Pos) => (c: string, { x, y }: Pos, len: number): string =>
-	rgb24(c, {
-		r: 255 * Math.sin(x / d.x),
-		g: 255 * Math.sin(y / d.y),
-		b: 255 * Math.sin(len),
-	})
 
 type DisplayOption = {
 	xss: Grid<string>
@@ -99,10 +82,9 @@ type DisplayOption = {
 	center: Pos
 	longest: number
 }
-const displayResult = ({ xss, yss, center, longest }: DisplayOption) => {
+const displayColor = ({ xss, yss, center, longest }: DisplayOption) => {
 	const w = xss[0].length
 	const h = xss.length
-	// const color = mkColor({ x: xss[0].length, y: xss.length }, center)
 
 	return zip(xss, yss)
 		.map(([xs, ys], j) =>
@@ -110,13 +92,11 @@ const displayResult = ({ xss, yss, center, longest }: DisplayOption) => {
 				.map(([x, y], i) =>
 					typeof y === "number"
 						? rgb24(x, {
-							r: 255 * (y / (longest / 100)),
-							g: 255 * (y / (longest / 10)),
-							b: 255 * (y / longest) ,
+							r: 255 * (0.5 + Math.sin((i - center.x) / w) / 2),
+							g: 255 * (0.5 + Math.sin((j - center.y) / h) / 2),
+							b: 255 * (0.5 + y / longest / 2),
 						})
 						: " "
-					// typeof y === "number" ? y : x
-					// color(x, { y: j, x: i }, typeof y === "number" ? y : 0)
 				).join("")
 		).join("\n")
 }
@@ -138,8 +118,10 @@ const movementMap = {
 	"─": [left, right],
 } as const
 
+type PaintColor = (c: Pipe) => string
+
 /**
- * paint loop made by `S` with `#`
+ * paint loop made by `S` with thick pipe
  *
  * TODO: paint distance instead?
  */
@@ -164,7 +146,7 @@ const paintLoop = (xss: Grid<Tile>): Grid<Loop> => {
 }
 
 const clean = (xss: Grid<Loop>): Grid<Loop> =>
-	xss.map((xs) => xs.map((c) => isVisited(c as Tile) ? c : " "))
+	xss.map((xs) => xs.map((c) => isVisited(c as Tile) ? c : "."))
 
 const startsLeft = (s: string) => ["┏", "┗", "━"].includes(s)
 const startsRight = (s: string) => ["┓", "┛", "━"].includes(s)
@@ -217,30 +199,83 @@ const findLongestTrail = (xss: Grid<Loop>): Grid<Lengths> => {
 	while (cursor) {
 		cursor = next(cursor)
 	}
-	// const [a, b] = loopEnds(yss)
-	// console.log({ a, b })
-	// const next = (prev: Pos, cur: Pos): Pos => {
-	//     const
-	// }
 	return yss
 }
 
-if (import.meta.main) {
-	// const text = await input(import.meta)
-	const text = example
-
-	const part1 = c(o(clean)(paintLoop)(parse))
-
-	const result = part1(text)
-	// console.log(display(result))
-
+const part1 = (result: Grid<Loop>) => {
 	const trail = findLongestTrail(result)
 	const center = findStart(result)
-	const longest = trail.flatMap((xs) => xs.filter((x): x is number => typeof x === "number"))
+	const longest = trail
+		.flatMap((xs) => xs.filter((x): x is number => typeof x === "number"))
 		.reduce((a, b) => Math.max(a, b))
 
-	console.log(displayResult({ xss: result, yss: trail, center, longest }))
+	console.log(displayColor({ xss: result, yss: trail, center, longest }))
 	console.log(longest)
+}
+
+const part2 = (xss: Grid<Loop>) => {
+	const center = findStart(xss)
+	// const yss: ("." | "█" | "#")[][] = xss.map((xs) => xs.map((c) => c === " " ? "." : "█"))
+	// const height = yss.length
+	// const width = yss[0].length
+
+	// // floodfill from 0,0 since it's guaranteed to be empty (we pad the input with empty lines)
+	// const stack: Pos[] = [{ y: 0, x: 0 }]
+	// const at = mkAt(yss)
+	// const visit = (p: Pos) => yss[p.y][p.x] = "#"
+	// const isWall = (p: Pos) => at(p) === "█"
+	// const isVisited = (p: Pos) => at(p) === "#"
+	// while (stack.length > 0) {
+	// 	const p = stack.pop()!
+	// 	if (isVisited(p) || isWall(p)) continue
+	// 	visit(p)
+	// 	if (0 < p.y) stack.push(up(p))
+	// 	if (p.y < height - 1) stack.push(down(p))
+	// 	if (0 < p.x) stack.push(left(p))
+	// 	if (p.x < width - 1) stack.push(right(p))
+	//     // diagonal
+	//     if (0 < p.y && 0 < p.x) stack.push(up(left(p)))
+	//     if (0 < p.y && p.x < width - 1) stack.push(up(right(p)))
+	//     if (p.y < height - 1 && 0 < p.x) stack.push(down(left(p)))
+	//     if (p.y < height - 1 && p.x < width - 1) stack.push(down(right(p)))
+	// }
+
+	// console.log(display(yss))
+	console.log(display(xss))
+}
+const example = outdent`
+.F----7F7F7F7F-7....
+.|F--7||||||||FJ....
+.||.FJ||||||||L7....
+FJL7L7LJLJ||LJ.L-7..
+L--J.L7...LJS7F-7L7.
+....F-J..F7FJ|L7L7L7
+....L7.F7||L7|.L7L7|
+.....|FJLJ|FJ|F7|.LJ
+....FJL-7.||.||||...
+....L---J.LJ.LJLJ...
+`
+if (import.meta.main) {
+	// const text = await input(import.meta)
+	// const text = example
+	const text = await input(import.meta)
+	const parsed = c(o(clean)(paintLoop)(parse))(text)
+
+	part1(parsed)
+	part2(parsed)
+	// const part1 = c(o(clean)(paintLoop)(parse))
+
+	// const result = part1(text)
+	// // console.log(display(result))
+
+	// const trail = findLongestTrail(result)
+	// const center = findStart(result)
+	// const longest = trail
+	// 	.flatMap((xs) => xs.filter((x): x is number => typeof x === "number"))
+	// 	.reduce((a, b) => Math.max(a, b))
+
+	// console.log(displayResult({ xss: result, yss: trail, center, longest }))
+	// console.log(longest)
 	// const yss = xss.map((xs) => xs.map((c) => isVisited(c) ? c : " "))
 
 	// console.log(display.includes("S"))

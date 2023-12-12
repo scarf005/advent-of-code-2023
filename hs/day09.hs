@@ -1,3 +1,8 @@
+#! /usr/bin/env cabal
+{- cabal:
+build-depends: base
+-}
+
 import Data.Functor ((<&>))
 
 lastDiff :: [Int] -> Int
@@ -5,10 +10,6 @@ lastDiff xs = last xs - last (init xs)
 
 diff :: [Int] -> [Int]
 diff xs = zipWith (-) (tail xs) xs
-
--- BAZ xs = FOO xs BAR if all (== 0) ys then lastDiff xs else BAZ ys
---     where ys = diff xs
-solve f g = f xs g (if all (== 0) ys then lastDiff xs else )
 
 -- | predicts the next number in the sequence
 -- by finding 'acceleration' from recursive diffs.

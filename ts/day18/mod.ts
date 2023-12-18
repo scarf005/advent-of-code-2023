@@ -3,11 +3,16 @@ import outdent from "$outdent/mod.ts"
 import { input, Pos, sum } from "$utils/mod.ts"
 type Dir = "U" | "D" | "L" | "R"
 const re = typedRegEx("(?<dir>U|D|L|R) (?<amount>\\d+) \\((?<color>.+)\\)")
-
 const parse = (x: string) => {
 	const { dir, amount, color } = re.captures(x)!
 
 	return { dir: dir as Dir, n: +amount, color }
+}
+const re2 = typedRegEx(". \\d+ \\(#(?<len>.{5})(?<dir>.)\\)")
+const parse2 = (x: string) => {
+	const { len, dir } = re2.captures(x)!
+
+	return { n: parseInt(len, 16), dir: (["R", "D", "L", "U"] as const)[+dir] }
 }
 
 const example = outdent`
@@ -30,13 +35,13 @@ U 2 (#7a21e3)
 const actual = await input(import.meta)
 
 const text = actual
-const parsed = text.split("\n").map(parse)
-const width = 510
-const height = 380
-const xss: ("#" | ".")[][] = Array.from(
-	{ length: height },
-	() => Array.from({ length: width }, () => "."),
-)
+const parsed = text.split("\n").map(parse2)
+// const width = 16287761
+// const height = 15143199
+// const xss: ("#" | ".")[][] = Array.from(
+// 	{ length: height },
+// 	() => Array.from({ length: width }, () => "."),
+// )
 
 const next = ({ y, x }: Pos, n: number, dir: Dir) => {
 	switch (dir) {
@@ -51,84 +56,40 @@ const next = ({ y, x }: Pos, n: number, dir: Dir) => {
 	}
 }
 
-const print = () => console.log(xss.map((xs) => xs.join("")).join("\n"))
+// const print = () => console.log(xss.map((xs) => xs.join("")).join("\n"))
 
-let here: Pos = { y: 240, x: 120 }
-let minX = 0
-let maxX = 0
-let minY = 0
-let maxY = 0
-for (const { dir, n, color } of parsed) {
-	const nextPos = next(here, n, dir)
-	// paint '.' to '#' from here to nextPos'
+let len = 2
+const points = parsed.reduce(
+	(acc, { dir, n }) => {
+		len += n
+		acc.push(next(acc.at(-1)!, n, dir))
+		return acc
+	},
+	[{ y: 0, x: 0 }],
+)
+points.shift()
+console.log(points)
 
-	switch (dir) {
-		case "U":
-			{
-				for (let y = here.y; y > nextPos.y; y--) {
-					xss[y][here.x] = "#"
-				}
-			}
-			break
-		case "D":
-			{
-				for (let y = here.y; y < nextPos.y; y++) {
-					xss[y][here.x] = "#"
-				}
-			}
-			break
-		case "L":
-			{
-				for (let x = here.x; x > nextPos.x; x--) {
-					xss[here.y][x] = "#"
-				}
-			}
-			break
-		case "R": {
-			for (let x = here.x; x < nextPos.x; x++) {
-				xss[here.y][x] = "#"
-			}
-		}
+// def calculate_area(points):
+//     N = len(points)
+//     area = 0
+
+//     for i in range(N):
+//         j = (i + 1) % N  # Ensures that after the last point, it loops back to the first
+//         area += points[i][1] * points[j][0] - points[i][0] * points[j][1]
+
+//     return abs(area) / 2
+const area = (xs: Pos[]) => {
+	const N = xs.length
+	let area = 0
+
+	for (let i = 0; i < N; i++) {
+		const j = (i + 1) % N
+		area += xs[i].y * xs[j].x - xs[i].x * xs[j].y
 	}
 
-	// console.log({ dir, n, here, nextPos })
-	// const end = posAdd(begin, dir, n)
-	// console.log({ dir, n, color, here, nextPos })
-	maxX = Math.max(maxX, nextPos.x)
-	maxY = Math.max(maxY, nextPos.y)
-	minX = Math.min(minX, nextPos.x)
-	minY = Math.min(minY, nextPos.y)
-	here = nextPos
+	return Math.abs(area) / 2
 }
-
-print()
-
-// floodfill
-const floodfill = () => {
-	const stack: Pos[] = [{ y: 200, x: 200 }]
-	// [{ y: Math.floor(size / 2), x: Math.floor(size / 2) }]
-	while (stack.length) {
-		const { y, x } = stack.pop()!
-		xss[y][x] = "#"
-
-		// if has up, push stack up
-		if (y > 0 && xss[y - 1][x] === ".") {
-			stack.push({ y: y - 1, x })
-		}
-		if (y < height - 1 && xss[y + 1][x] === ".") {
-			stack.push({ y: y + 1, x })
-		}
-		if (x > 0 && xss[y][x - 1] === ".") {
-			stack.push({ y, x: x - 1 })
-		}
-		if (x < width - 1 && xss[y][x + 1] === ".") {
-			stack.push({ y, x: x + 1 })
-		}
-	}
-}
-floodfill()
-print()
-
-const filled = xss.map((xs) => xs.filter((x) => x === "#").length).reduce(sum)
-console.log({ filled })
-console.log({ minX, maxX, minY, maxY })
+const expected = 952408144115
+const answer = len / 2 + area(points)
+console.log({ expected, answer }, expected - answer)

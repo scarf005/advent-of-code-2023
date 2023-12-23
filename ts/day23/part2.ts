@@ -1,9 +1,8 @@
-import { display, ex, mkGet, mkInBounds, parse, posEq, Tile } from "./mod.ts"
+import { actual, display, ex, mkGet, mkInBounds, parse, posEq, Tile } from "./mod.ts"
 import { Grid, wh } from "$utils/grid.ts"
 import { HashSet } from "$rimbu/hashed/mod.ts"
 import { EdgeValuedGraphHashed } from "$rimbu/graph/mod.ts"
-import { bgBrightRed, bgRgb24, bold, rgb24 } from "$std/fmt/colors.ts"
-import outdent from "$outdent/mod.ts"
+import { bgBrightRed, bgBrightYellow, bold, brightBlue } from "$std/fmt/colors.ts"
 
 class Pos {
 	constructor(readonly y: number, readonly x: number) {}
@@ -15,17 +14,14 @@ class Pos {
 	}
 }
 
-const displayVisited = (xss: Grid<Tile>, visited: HashSet<Pos>): string => {
+const displayVisited = (xss: Grid<Tile>, s: Pos, e: Pos, visited: HashSet<Pos>): string => {
 	const yss = structuredClone(xss)
 
-	let i = 0
 	visited.forEach(({ y, x }) => {
-		const c = 105 + Math.floor((i / visited.size) * 150)
-		const isEdge = i === 0 || i === visited.size - 1
-		yss[y][x] = bold(isEdge ? bgBrightRed("X") : rgb24("O", { r: c / 2, g: c, b: c * 1.5 }))
-
-		i++
+		yss[y][x] = bold(brightBlue("O"))
 	})
+	yss[s.y][s.x] = bgBrightYellow("S")
+	yss[e.y][e.x] = bgBrightRed("X")
 	return display(yss)
 }
 
@@ -38,13 +34,16 @@ const next = (p: Pos): Pos[] => {
 	return [up, down, left, right]
 }
 
+type Graph = EdgeValuedGraphHashed<Pos, number>
+
 /**
  * converts maze into undirected graph with start end end nodes
  */
-const asGraph = (xss: Grid<Tile>) => {
+const asGraph = (xss: Grid<Tile>): Graph => {
 	const graph = EdgeValuedGraphHashed.builder<Pos, number>()
 
 	const { width, height } = wh(xss)
+
 	const begin = Pos.from({ y: 0, x: 1 })
 	const end = Pos.from({ y: height - 1, x: width - 2 })
 
@@ -53,42 +52,67 @@ const asGraph = (xss: Grid<Tile>) => {
 	const inBounds = mkInBounds(xss)
 	const get = mkGet(xss)
 
-
 	/** len excludes position of node */
-	const dfs = (lastFork: Pos | null, cur: Pos, visited: HashSet<Pos>) => {
-		if (lastFork && posEq(cur, end)) {
-			// console.log("reached end")
-			graph.connect(lastFork, end, visited.size)
-			return
-		}
-		const nexts = next(cur).filter((x) => inBounds(x) && !visited.has(x) && get(x) !== "#")
+	const dfs = (
+		fork: Pos,
+		from: Pos,
+		globalForks: HashSet<Pos>,
+	) => {
+		let cur = from
+		const path = HashSet.builder<Pos>()
 
-		// console.log({ lastFork, nexts })
-		if (nexts.length === 0) {
-			return
-		} else if (nexts.length === 1) {
-			// edge, continue visiting
-			dfs(lastFork, nexts[0], visited.add(cur))
-		} else {
-			// fork, begin new dfs
-			console.log({ cur, nexts, visited: [...visited] })
-			console.log(displayVisited(xss, visited.add(cur)) + "\n")
+		while (true) {
+			if (posEq(cur, end)) {
+				// console.log("found end", fork, cur)
+				// console.log(path.size)
+				graph.connect(fork, cur, path.size + 1)
+				return
+			}
 
-			graph.addNode(cur)
-			graph.connect(lastFork ?? begin, cur, visited.size)
-			const nextVisited = visited.add(cur)
-			for (const next of nexts) {
-				dfs(cur, next, nextVisited)
+			const nexts = next(cur).filter((x) =>
+				inBounds(x) && !path.has(x) && !globalForks.has(x) && get(x) !== "#"
+			)
+			// console.log(nexts)
+			if (nexts.length === 0) {
+				// console.log("dead end", fork, cur)
+				return
+			} else if (nexts.length === 1) {
+				// console.log({ cur, nexts, size: path.size })
+				path.add(cur)
+				cur = nexts[0]
+			} else {
+				// console.log(nexts, path.size, "fork")
+				// console.log({ fork, cur })
+				// const builtPath = path.build()
+				const nextGlobal = globalForks.add(cur)
+				// console.log([...path.build()])
+				console.log(displayVisited(xss, from, cur, path.build()))
+				console.log(globalForks.size)
+
+				graph.connect(fork, cur, path.size)
+				// console.log("nextGlobal", [...nextGlobal])
+				for (const next of nexts) {
+					// console.log(next)
+					dfs(cur, next, nextGlobal)
+				}
+				return
 			}
 		}
 	}
 
-	dfs(null, begin, HashSet.of(begin))
+	dfs(begin, Pos.from({ y: 1, x: 1 }), HashSet.of<Pos>(begin))
 	return graph.build()
 }
 
+// const findLongestPath = (graph: Graph, begin: Pos, end: Pos): number => {
+// 	const dfs = (from: Pos, visited: HashSet<Pos>): number => {
+// 	}
+// }
+
 if (import.meta.main) {
-	const xss = parse(ex)
+	const [flag] = Deno.args
+	const xss = parse(flag ? actual : ex)
+	const { width, height } = wh(xss)
 
 	const graph = asGraph(xss)
 	// console.log(graph.toString())
@@ -97,7 +121,7 @@ if (import.meta.main) {
 		.streamNodes()
 		.map(({ y, x }) => `${toNode({ y, x })} [pos="${x},${y}!"]`).join({ sep: "\n" })
 
-	const dot = graph.stream()
+	const dot = graph.streamConnections()
 		.filter(([, r]) => r !== undefined)
 		.map(([l, r, weight]) => `${toNode(l)} -- ${toNode(r!)} [label="${weight}"]`)
 		.join({ sep: "\n" })
@@ -108,12 +132,12 @@ if (import.meta.main) {
         ${dot}
     }`
 
-	const yss = structuredClone(xss)
-	for (const { y, x } of graph.streamNodes()) {
-		yss[y][x] = bgBrightRed("X")
-        // yss[y][x + 1] = `y${y}x${x}`
-	}
-	console.log(display(yss))
+	console.log(graph.toString())
+	// const yss = structuredClone(xss)
+	// for (const { y, x } of graph.streamNodes()) {
+	// 	yss[y][x] = bgBrightRed("X")
+	// }
+	// console.log(display(yss))
 
 	await Deno.writeTextFile("graph.dot", dotText)
 }

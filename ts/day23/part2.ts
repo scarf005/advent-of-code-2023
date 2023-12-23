@@ -53,37 +53,37 @@ const asGraph = (xss: Grid<Tile>) => {
 	const inBounds = mkInBounds(xss)
 	const get = mkGet(xss)
 
+
 	/** len excludes position of node */
-	const dfs = (lastFork: Pos | null, cur: Pos, len: number, visited: HashSet<Pos>) => {
-		if (posEq(cur, end)) {
+	const dfs = (lastFork: Pos | null, cur: Pos, visited: HashSet<Pos>) => {
+		if (lastFork && posEq(cur, end)) {
 			// console.log("reached end")
-			graph.connect(cur, end, len)
+			graph.connect(lastFork, end, visited.size)
 			return
 		}
 		const nexts = next(cur).filter((x) => inBounds(x) && !visited.has(x) && get(x) !== "#")
 
-		// if (!posEq(cur, begin)) {
-		// 	graph.addNode(cur)
-		// 	graph.connect(prev, cur, visited.size)
-		// }
-		if (nexts.length === 1) {
+		// console.log({ lastFork, nexts })
+		if (nexts.length === 0) {
+			return
+		} else if (nexts.length === 1) {
 			// edge, continue visiting
-			dfs(cur, nexts[0], len + 1, visited.add(cur))
+			dfs(lastFork, nexts[0], visited.add(cur))
 		} else {
 			// fork, begin new dfs
-			// console.log({ cur, nexts, visited: [...visited] })
-
+			console.log({ cur, nexts, visited: [...visited] })
 			console.log(displayVisited(xss, visited.add(cur)) + "\n")
+
 			graph.addNode(cur)
 			graph.connect(lastFork ?? begin, cur, visited.size)
 			const nextVisited = visited.add(cur)
 			for (const next of nexts) {
-				dfs(cur, next, 0, nextVisited)
+				dfs(cur, next, nextVisited)
 			}
 		}
 	}
 
-	dfs(null, begin, 0, HashSet.empty<Pos>())
+	dfs(null, begin, HashSet.of(begin))
 	return graph.build()
 }
 
@@ -96,6 +96,7 @@ if (import.meta.main) {
 	const nodes = graph
 		.streamNodes()
 		.map(({ y, x }) => `${toNode({ y, x })} [pos="${x},${y}!"]`).join({ sep: "\n" })
+
 	const dot = graph.stream()
 		.filter(([, r]) => r !== undefined)
 		.map(([l, r, weight]) => `${toNode(l)} -- ${toNode(r!)} [label="${weight}"]`)
@@ -106,6 +107,13 @@ if (import.meta.main) {
 
         ${dot}
     }`
-	// console.log(dotText)
+
+	const yss = structuredClone(xss)
+	for (const { y, x } of graph.streamNodes()) {
+		yss[y][x] = bgBrightRed("X")
+        // yss[y][x + 1] = `y${y}x${x}`
+	}
+	console.log(display(yss))
+
 	await Deno.writeTextFile("graph.dot", dotText)
 }

@@ -1,4 +1,4 @@
-import { Grid } from "../day11/mod.ts"
+import { Grid } from "../utils/grid.ts"
 import { Pos } from "$utils/mod.ts"
 import { actual, displayVisited, mkGet, mkInBounds, parse, posEq, Tile } from "./mod.ts"
 

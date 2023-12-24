@@ -2,6 +2,7 @@ import outdent from "$outdent/mod.ts"
 import { zip } from "$std/collections/zip.ts"
 import { assertEquals } from "$std/assert/assert_equals.ts"
 import { id, input, parallelOption, Pos, sum } from "$utils/mod.ts"
+import { Grid } from "../utils/grid.ts"
 
 // 10x10
 const example = outdent`
@@ -36,8 +37,6 @@ const example2 = outdent`
  * `#`: Galaxy, `.`: space
  */
 type Tile = "#" | "."
-
-export type Grid<T> = readonly (readonly T[])[]
 
 export const parse = (x: string): Grid<Tile> => x.split("\n").map((x) => x.split("")) as Grid<Tile>
 
@@ -95,7 +94,7 @@ export const combination = <T>(xs: readonly T[], n: number): readonly T[][] => {
 	const withX = combination(rest, n - 1).map((ys) => [x, ...ys])
 	const withoutX = combination(rest, n)
 
-    return withX.concat(withoutX)
+	return withX.concat(withoutX)
 }
 
 export const manhattanDist = (a: Pos, b: Pos): number => Math.abs(a.x - b.x) + Math.abs(a.y - b.y)
@@ -140,7 +139,7 @@ Deno.test("expand", () => {
 })
 
 export const solve = (xss: Grid<Tile>) => (multiplier: number): number => {
-    const points = expand(xss, multiplier)
+	const points = expand(xss, multiplier)
 	const begin = performance.now()
 	const ps = combination(points, 2)
 	console.log(performance.now() - begin, "ms")

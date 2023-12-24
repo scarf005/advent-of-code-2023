@@ -1,7 +1,7 @@
 import outdent from "$outdent/mod.ts"
 import { zip } from "$std/collections/zip.ts"
 import { assertEquals } from "$std/assert/assert_equals.ts"
-import { Grid } from "../day11/mod.ts"
+import { Grid } from "../utils/grid.ts"
 import { input, sum } from "$utils/mod.ts"
 
 type Tiles = "O" | "." | "#"
@@ -56,7 +56,6 @@ const ts = (x: string) => x.split("") as readonly Tiles[]
  */
 const parsedExample = parse(example)
 
-
 console.log(parsedExample.map((x) => x.join("")).join("\n"))
 console.log()
 // console.log("....O#.O#.", moveRow(ts("....O#.O#.")))
@@ -79,7 +78,7 @@ console.log(
 			// ([begin, rocks]) => [height - +begin, rocks.length],
 		)
 	)
-	.flat().reduce(sum),
+		.flat().reduce(sum),
 )
 // 10 + 9 + 8 + 7 = 34
 // ((10 - 0) + (10 - 0 - (4 - 1))) * 4 / 2

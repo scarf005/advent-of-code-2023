@@ -15,7 +15,7 @@ import {
 	red,
 	yellow,
 } from "$std/fmt/colors.ts"
-import { Grid } from "../day11/mod.ts"
+import { Grid } from "../utils/grid.ts"
 
 const parse = (s: string) => s.split("\n").map((sx) => sx.split("").map((x) => +x))
 const display = (xss: Grid<number>) =>

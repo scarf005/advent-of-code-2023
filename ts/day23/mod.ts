@@ -1,5 +1,5 @@
 import outdent from "$outdent/mod.ts"
-import { Grid } from "../day11/mod.ts"
+import { Grid } from "../utils/grid.ts"
 import { input, Pos } from "$utils/mod.ts"
 import { bgRgb24, bold, rgb24 } from "$std/fmt/colors.ts"
 

@@ -1,0 +1,38 @@
+strict digraph G {
+    splines = false;
+    y13x5;
+    y11x21;
+    y3x11;
+    y5x3;
+    y22x21;
+    y0x1;
+    y19x13;
+    y13x13;
+    y19x19;
+
+    subgraph Longest {
+        node [style = "filled"; fillcolor = "#ffd900";];
+        edge [color = "#ffd900";];
+        y0x1 -> y5x3 [label = "15";];
+        y11x21 -> y19x19 [label = "10";];
+        y3x11 -> y11x21 [label = "30";];
+        y13x13 -> y3x11 [label = "24";];
+        y13x5 -> y19x13 [label = "38";];
+        y19x19 -> y22x21 [label = "5";];
+        y5x3 -> y13x5 [label = "22";];
+        y19x13 -> y13x13 [label = "10";];
+    }
+
+    subgraph All {
+        edge [dir = none; color = "gray";];
+        y19x19 -> y22x21 [label = "5";];
+        y19x13 -> y13x5 [label = "38";];
+        y19x19 -> y19x13 [label = "10";];
+        y13x13 -> y13x5 [label = "12";];
+        y0x1 -> y5x3 [label = "15";];
+        y13x13 -> y11x21 [label = "18";];
+        y5x3 -> y3x11 [label = "22";];
+        y13x13 -> y3x11 [label = "24";];
+        y3x11 -> y11x21 [label = "30";];
+    }
+}

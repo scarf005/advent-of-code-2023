@@ -8,3 +8,5 @@ export const countBy = <K extends keyof any, V>(xs: V[], f: (x: V) => K): Map<K,
 	}
 	return counts
 }
+
+export const countIf = <T>(f: (x: T) => boolean) => (acc: number, x: T) => acc + (f(x) ? 1 : 0)

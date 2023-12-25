@@ -20,3 +20,12 @@ const xs = [
 ]
 
 Deno.test("shoelaceArea", () => assertEquals(shoelaceArea(xs), 42))
+
+const ys = [
+	{ y: 2, x: 2 },
+	{ y: 2, x: 4 },
+	{ y: 4, x: 4 },
+	{ y: 4, x: 2 },
+]
+
+Deno.test("shoelaceArea", () => assertEquals(shoelaceArea(ys), 4))

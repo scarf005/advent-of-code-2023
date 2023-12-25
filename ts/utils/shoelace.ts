@@ -1,5 +1,10 @@
 import { Pos } from "$utils/mod.ts"
 
+/**
+ * Calculates the area of a polygon using the shoelace formula.
+ *
+ * the input must be clockwise or counterclockwise.
+ */
 export const shoelaceArea = (xs: Pos[]) => {
 	const N = xs.length
 	let area = 0

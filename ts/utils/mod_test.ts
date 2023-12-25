@@ -2,9 +2,9 @@ import { assertEquals } from "$std/assert/assert_equals.ts"
 import { day, gcd, parallelOption } from "./mod.ts"
 
 Deno.test("gets correct day", () => {
-	const input = "file:///home/scarf/repo/aoc-2023/ts/day1/part2.ts"
+	const input = "file:///home/scarf/repo/aoc-2023/ts/day01/part2.ts"
 
-	assertEquals(day(input), 1)
+	assertEquals(day(input), "01")
 })
 
 Deno.test("gcd", parallelOption, async (t) => {
@@ -23,5 +23,3 @@ Deno.test("gcd", parallelOption, async (t) => {
 
 	await Promise.all(checks)
 })
-
-// Deno.test(  "lcm", parallelOption, async (t) => {

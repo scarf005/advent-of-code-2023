@@ -1,9 +1,11 @@
 import { input } from "$utils/mod.ts"
-import outdent from "$outdent/mod.ts"
 import { assertEquals } from "$std/assert/assert_equals.ts"
 import { c, o } from "$copb/mod.ts"
 import { zip } from "$std/collections/zip.ts"
 import { rgb24 } from "$std/fmt/colors.ts"
+import { shoelaceArea } from "$utils/shoelace.ts"
+import { posEq } from "../day23/mod.ts"
+import { ex2 } from "./_example.ts"
 
 type Base = "S" | " "
 type Tile = Base | Pipe | VisitedPipe
@@ -145,8 +147,8 @@ const paintLoop = (xss: Grid<Tile>): Grid<Loop> => {
 	return yss
 }
 
-const clean = (xss: Grid<Loop>): Grid<Loop> =>
-	xss.map((xs) => xs.map((c) => isVisited(c as Tile) ? c : "."))
+const clean = (xss: Grid<Loop>) =>
+	xss.map((xs) => xs.map((c) => isVisited(c as Tile) ? c : ".")) as Grid<Loop>
 
 const startsLeft = (s: string) => ["┏", "┗", "━"].includes(s)
 const startsRight = (s: string) => ["┓", "┛", "━"].includes(s)
@@ -202,81 +204,51 @@ const findLongestTrail = (xss: Grid<Loop>): Grid<Lengths> => {
 	return yss
 }
 
-const part1 = (result: Grid<Loop>) => {
+const getLoop = (xss: Grid<Loop>): Pos[] => {
+	const yss = structuredClone(xss)
+	const s = findStart(yss as Grid<Loop>)
+	const getNext = mkGetNext(yss as Grid<Loop>)
+
+	let cursor: Pos | undefined = connected(yss, s)[0]
+
+	yss[s.y][s.x] = null
+	const path: Pos[] = [s]
+
+	while (cursor) {
+		yss[cursor.y][cursor.x] = null
+		path.push(cursor)
+		cursor = getNext(cursor)
+	}
+	return path
+}
+
+export const parseGrid = c(o(clean)(paintLoop)(parse))
+
+export const part1 = (result: Grid<Loop>): number => {
 	const trail = findLongestTrail(result)
-	const center = findStart(result)
 	const longest = trail
 		.flatMap((xs) => xs.filter((x): x is number => typeof x === "number"))
 		.reduce((a, b) => Math.max(a, b))
 
-	console.log(displayColor({ xss: result, yss: trail, center, longest }))
-	console.log(longest)
+	// const center = findStart(result)
+	// console.log(displayColor({ xss: result, yss: trail, center, longest }))
+	// console.log(longest)
+
+	return longest
 }
 
-const part2 = (xss: Grid<Loop>) => {
-	const center = findStart(xss)
-	// const yss: ("." | "█" | "#")[][] = xss.map((xs) => xs.map((c) => c === " " ? "." : "█"))
-	// const height = yss.length
-	// const width = yss[0].length
+export const part2 = (xss: Grid<Loop>): number => {
+	const loop = getLoop(xss)
 
-	// // floodfill from 0,0 since it's guaranteed to be empty (we pad the input with empty lines)
-	// const stack: Pos[] = [{ y: 0, x: 0 }]
-	// const at = mkAt(yss)
-	// const visit = (p: Pos) => yss[p.y][p.x] = "#"
-	// const isWall = (p: Pos) => at(p) === "█"
-	// const isVisited = (p: Pos) => at(p) === "#"
-	// while (stack.length > 0) {
-	// 	const p = stack.pop()!
-	// 	if (isVisited(p) || isWall(p)) continue
-	// 	visit(p)
-	// 	if (0 < p.y) stack.push(up(p))
-	// 	if (p.y < height - 1) stack.push(down(p))
-	// 	if (0 < p.x) stack.push(left(p))
-	// 	if (p.x < width - 1) stack.push(right(p))
-	//     // diagonal
-	//     if (0 < p.y && 0 < p.x) stack.push(up(left(p)))
-	//     if (0 < p.y && p.x < width - 1) stack.push(up(right(p)))
-	//     if (p.y < height - 1 && 0 < p.x) stack.push(down(left(p)))
-	//     if (p.y < height - 1 && p.x < width - 1) stack.push(down(right(p)))
-	// }
-
-	// console.log(display(yss))
-	console.log(display(xss))
+	return shoelaceArea(loop) - loop.length / 2 + 1
 }
-const example = outdent`
-.F----7F7F7F7F-7....
-.|F--7||||||||FJ....
-.||.FJ||||||||L7....
-FJL7L7LJLJ||LJ.L-7..
-L--J.L7...LJS7F-7L7.
-....F-J..F7FJ|L7L7L7
-....L7.F7||L7|.L7L7|
-.....|FJLJ|FJ|F7|.LJ
-....FJL-7.||.||||...
-....L---J.LJ.LJLJ...
-`
+
 if (import.meta.main) {
 	// const text = await input(import.meta)
-	// const text = example
-	const text = await input(import.meta)
+	const actual = await input(import.meta)
+	const text = ex2
 	const parsed = c(o(clean)(paintLoop)(parse))(text)
 
-	part1(parsed)
-	part2(parsed)
-	// const part1 = c(o(clean)(paintLoop)(parse))
-
-	// const result = part1(text)
-	// // console.log(display(result))
-
-	// const trail = findLongestTrail(result)
-	// const center = findStart(result)
-	// const longest = trail
-	// 	.flatMap((xs) => xs.filter((x): x is number => typeof x === "number"))
-	// 	.reduce((a, b) => Math.max(a, b))
-
-	// console.log(displayResult({ xss: result, yss: trail, center, longest }))
-	// console.log(longest)
-	// const yss = xss.map((xs) => xs.map((c) => isVisited(c) ? c : " "))
-
-	// console.log(display.includes("S"))
+	console.log(part1(parsed))
+	console.log(part2(parsed))
 }

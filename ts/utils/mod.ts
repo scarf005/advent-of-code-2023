@@ -13,7 +13,11 @@ export const questionPath = (url: string) => new URL(`../../.cache/${day(url)}.t
 export const input = (meta: ImportMeta) =>
 	Deno.readTextFile(questionPath(meta.url)).then((text) => text.trim())
 
-export type Pos = { y: number; x: number }
+export type V2<T > = { y: T; x: T }
+export type Pos = V2<number>
+export type Dim = { w: number; h: number }
+
+export type Dir = "U" | "D" | "L" | "R"
 
 /** Test that can be ran in parallel */
 export const parallelOption = {
